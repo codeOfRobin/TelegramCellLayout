@@ -37,29 +37,42 @@ class TelegramView: UIView {
 
 		print(messageLabel.layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: 1), in: textContainer))
 
-		let timeTextContainer = NSTextContainer(size: CGSize(width: size.width - messageLabelLastGlyphFrame.maxY, height: size.height))
+		let timeTextContainer = NSTextContainer(size: size)
 		timeLabel.layoutManager.insertTextContainer(timeTextContainer, at: 0)
 		timeLabel.layoutManager.ensureLayout(for: timeTextContainer)
 
-		let timeLabelLastGlyphFrame = timeLabel.layoutManager.boundingRect(forGlyphRange: NSRange(location: timeLabel.text.count - 1, length: 1), in: timeTextContainer)
-		let timeLabelLastLineFrame = timeLabel.layoutManager.lineFragmentRect(forGlyphAt: 0, effectiveRange: nil)
+		let timeLabelLastGlyphFrame = timeLabel.layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: 1), in: timeTextContainer)
 
-		let estimatedMessageSize = messageLabel.layoutManager.usedRect(for: textContainer).size
-		let estimatedTimeSize = timeLabel.layoutManager.usedRect(for: timeTextContainer).size
+		let estimatedMessageLastLineWidth = messageLabelLastGlyphFrame.maxX
+		let estimatedTimeWidth = size.width - timeLabelLastGlyphFrame.minX
 
 		messageLabel.layoutManager.removeTextContainer(at: 0)
 		timeLabel.layoutManager.removeTextContainer(at: 0)
-		if timeLabelLastGlyphFrame.origin.y > 0 {
-			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
-			let timeLabelFrame = CGRect(origin: CGPoint(x: 0, y: messageLabelFrame.maxY), size: estimatedTimeSize)
-			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: false)
+
+		if estimatedTimeWidth + estimatedMessageLastLineWidth < size.width {
+			let messageFrame = messageLabel.layoutManager.usedRect(for: textContainer)
+			let timeFrame = timeLabel.layoutManager.usedRect(for: timeTextContainer)
+			let newTimeFrame = CGRect(x: timeLabelLastGlyphFrame.maxX, y: timeLabelLastGlyphFrame.minY, width: timeFrame.width, height: timeFrame.height)
+			return (message: messageFrame, time: newTimeFrame, sameLine: true)
 		} else {
-			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
-			///Assume timeLabel is one line
-			let width = size.width - messageLabelFrame.width
-			let timeLabelFrame = CGRect(x: messageLabelFrame.maxX, y: messageLabelLastGlyphFrame.minY, width: width, height: timeLabelLastLineFrame.height)
-			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: true)
+			let messageFrame = messageLabel.layoutManager.usedRect(for: textContainer)
+			let timeFrame = timeLabel.layoutManager.usedRect(for: timeTextContainer)
+			let newTimeFrame = CGRect(x: 0, y: 0, width: timeFrame.width, height: timeFrame.height)
+			return (message: messageFrame, time: newTimeFrame, sameLine: true)
 		}
+
+		fatalError()
+//		if timeLabelLastGlyphFrame.origin.y > 0 {
+//			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
+//			let timeLabelFrame = CGRect(origin: CGPoint(x: 0, y: messageLabelFrame.maxY), size: estimatedTimeSize)
+//			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: false)
+//		} else {
+//			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
+//			///Assume timeLabel is one line
+//			let width = size.width - messageLabelFrame.width
+//			let timeLabelFrame = CGRect(x: messageLabelFrame.maxX, y: messageLabelLastGlyphFrame.minY, width: width, height: timeLabelLastLineFrame.height)
+//			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: true)
+//		}
 	}
 
 	override func sizeThatFits(_ size: CGSize) -> CGSize {
