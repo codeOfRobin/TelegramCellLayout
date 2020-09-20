@@ -22,6 +22,14 @@ class TelegramView: UIView {
 		self.addSubview(messageLabel)
 		self.addSubview(timeLabel)
 		self.timeLabel.textAlignment = .right
+		self.timeLabel.textContainerInset = .zero
+		self.messageLabel.textContainerInset = .zero
+		self.messageLabel.font = UIFont.systemFont(ofSize: 20.0)
+		self.messageLabel.bounces = false
+		self.timeLabel.bounces = false
+
+//		self.messageLabel.backgroundColor = .systemTeal
+//		self.timeLabel.backgroundColor = .systemGreen
 	}
 
 	required init?(coder: NSCoder) {
@@ -32,10 +40,9 @@ class TelegramView: UIView {
 	func calculateFrames(size: CGSize) -> (message: CGRect, time: CGRect, sameLine: Bool) {
 		let textContainer = NSTextContainer(size: size)
 		messageLabel.layoutManager.insertTextContainer(textContainer, at: 0)
+		textContainer.heightTracksTextView = true
 		messageLabel.layoutManager.ensureLayout(for: textContainer)
 		let messageLabelLastGlyphFrame = messageLabel.layoutManager.boundingRect(forGlyphRange: NSRange(location: messageLabel.text.count - 1, length: 1), in: textContainer)
-
-		print(messageLabel.layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: 1), in: textContainer))
 
 		let timeTextContainer = NSTextContainer(size: size)
 		timeLabel.layoutManager.insertTextContainer(timeTextContainer, at: 0)
@@ -46,33 +53,19 @@ class TelegramView: UIView {
 		let estimatedMessageLastLineWidth = messageLabelLastGlyphFrame.maxX
 		let estimatedTimeWidth = size.width - timeLabelLastGlyphFrame.minX
 
+		let oldMessageFrame = messageLabel.layoutManager.usedRect(for: textContainer)
+		let messageFrame = CGRect(origin: .zero, size: CGSize(width: size.width, height: oldMessageFrame.height))
+		let timeFrame = timeLabel.layoutManager.usedRect(for: timeTextContainer)
 		messageLabel.layoutManager.removeTextContainer(at: 0)
 		timeLabel.layoutManager.removeTextContainer(at: 0)
 
 		if estimatedTimeWidth + estimatedMessageLastLineWidth < size.width {
-			let messageFrame = messageLabel.layoutManager.usedRect(for: textContainer)
-			let timeFrame = timeLabel.layoutManager.usedRect(for: timeTextContainer)
-			let newTimeFrame = CGRect(x: timeLabelLastGlyphFrame.maxX, y: timeLabelLastGlyphFrame.minY, width: timeFrame.width, height: timeFrame.height)
+			let newTimeFrame = CGRect(x: messageLabelLastGlyphFrame.maxX, y: messageLabelLastGlyphFrame.maxY - timeFrame.height, width: size.width - messageLabelLastGlyphFrame.maxX, height: timeFrame.height)
 			return (message: messageFrame, time: newTimeFrame, sameLine: true)
 		} else {
-			let messageFrame = messageLabel.layoutManager.usedRect(for: textContainer)
-			let timeFrame = timeLabel.layoutManager.usedRect(for: timeTextContainer)
-			let newTimeFrame = CGRect(x: 0, y: 0, width: timeFrame.width, height: timeFrame.height)
+			let newTimeFrame = CGRect(x: 0, y: messageFrame.maxY, width: size.width, height: timeFrame.height)
 			return (message: messageFrame, time: newTimeFrame, sameLine: true)
 		}
-
-		fatalError()
-//		if timeLabelLastGlyphFrame.origin.y > 0 {
-//			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
-//			let timeLabelFrame = CGRect(origin: CGPoint(x: 0, y: messageLabelFrame.maxY), size: estimatedTimeSize)
-//			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: false)
-//		} else {
-//			let messageLabelFrame = CGRect(origin: .zero, size: estimatedMessageSize)
-//			///Assume timeLabel is one line
-//			let width = size.width - messageLabelFrame.width
-//			let timeLabelFrame = CGRect(x: messageLabelFrame.maxX, y: messageLabelLastGlyphFrame.minY, width: width, height: timeLabelLastLineFrame.height)
-//			return (message: messageLabelFrame, time: timeLabelFrame, sameLine: true)
-//		}
 	}
 
 	override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -97,18 +90,27 @@ class TelegramView: UIView {
 
 class ViewController: UIViewController {
 
-	let telegramView = TelegramView(message: "long message that does messagey things", time: "9:41 AM")
+	let telegramView0 = TelegramView(message: "short message", time: "9:41 AM")
+	let telegramView1 = TelegramView(message: "long message that does messagey things too amongst others", time: "9:41 AM")
+	let telegramView2 = TelegramView(message: "long message that doesn't do much", time: "9:41 AM")
+
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		self.view.backgroundColor = .white
-		self.view.addSubview(telegramView)
+		self.view.addSubview(telegramView0)
+		self.view.addSubview(telegramView1)
+		self.view.addSubview(telegramView2)
 	}
 
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
-		let size = telegramView.sizeThatFits(CGSize(width: view.frame.width, height: .infinity))
-		telegramView.frame = CGRect(origin: .zero, size: size)
+		let size0 = telegramView0.sizeThatFits(CGSize(width: view.frame.width, height: .infinity))
+		let size1 = telegramView1.sizeThatFits(CGSize(width: view.frame.width, height: .infinity))
+		let size2 = telegramView2.sizeThatFits(CGSize(width: view.frame.width, height: .infinity))
+		telegramView0.frame = CGRect(origin: CGPoint(x: 0, y: 100), size: size0)
+		telegramView1.frame = CGRect(origin: CGPoint(x: 0, y: telegramView0.frame.maxY + 20), size: size1)
+		telegramView2.frame = CGRect(origin: CGPoint(x: 0, y: telegramView1.frame.maxY + 20), size: size2)
 	}
 
 
