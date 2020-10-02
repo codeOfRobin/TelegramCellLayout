@@ -24,6 +24,8 @@ class TelegramView: UIView {
 		self.timeLabel.textAlignment = .right
 		self.timeLabel.textContainerInset = .zero
 		self.messageLabel.textContainerInset = .zero
+		self.messageLabel.textContainer.lineFragmentPadding = 0.0
+		self.timeLabel.textContainer.lineFragmentPadding = 0.0
 		self.messageLabel.font = UIFont.systemFont(ofSize: 20.0)
 		self.messageLabel.bounces = false
 		self.timeLabel.bounces = false
@@ -59,8 +61,11 @@ class TelegramView: UIView {
 		messageLabel.layoutManager.removeTextContainer(at: 0)
 		timeLabel.layoutManager.removeTextContainer(at: 0)
 
+		print(messageLabel.textContainerInset)
+		let descenderDiff = ((messageLabel.font!.descender) - (timeLabel.font!.descender))
+
 		if estimatedTimeWidth + estimatedMessageLastLineWidth < size.width {
-			let newTimeFrame = CGRect(x: messageLabelLastGlyphFrame.maxX, y: messageLabelLastGlyphFrame.maxY - timeFrame.height, width: size.width - messageLabelLastGlyphFrame.maxX, height: timeFrame.height)
+			let newTimeFrame = CGRect(x: messageLabelLastGlyphFrame.maxX, y: messageLabelLastGlyphFrame.maxY - timeFrame.height + descenderDiff, width: size.width - messageLabelLastGlyphFrame.maxX, height: timeFrame.height)
 			return (message: messageFrame, time: newTimeFrame, sameLine: true)
 		} else {
 			let newTimeFrame = CGRect(x: 0, y: messageFrame.maxY, width: size.width, height: timeFrame.height)
