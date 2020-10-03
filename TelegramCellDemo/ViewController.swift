@@ -8,8 +8,8 @@
 import UIKit
 
 extension CGRect {
-	func alignToPixelGrid() -> CGRect {
-		return CGRect(x: round(self.origin.x), y: round(self.origin.y), width: round(self.width), height: round(self.height))
+	func alignedToPixelGrid() -> CGRect {
+		return CGRect(x: floor(self.origin.x), y: floor(self.origin.y), width: floor(self.width), height: floor(self.height))
 	}
 }
 
@@ -71,10 +71,10 @@ class TelegramView: UIView {
 
 		if estimatedTimeWidth + estimatedMessageLastLineWidth < size.width {
 			let newTimeFrame = CGRect(x: messageLabelLastGlyphFrame.maxX, y: messageLabelLastGlyphFrame.maxY - timeFrame.height + descenderDiff, width: size.width - messageLabelLastGlyphFrame.maxX, height: timeFrame.height)
-			return (message: messageFrame.alignToPixelGrid(), time: newTimeFrame.alignToPixelGrid(), sameLine: true)
+			return (message: messageFrame.alignedToPixelGrid(), time: newTimeFrame.alignedToPixelGrid(), sameLine: true)
 		} else {
 			let newTimeFrame = CGRect(x: 0, y: messageFrame.maxY, width: size.width, height: timeFrame.height)
-			return (message: messageFrame.alignToPixelGrid(), time: newTimeFrame.alignToPixelGrid(), sameLine: true)
+			return (message: messageFrame.alignedToPixelGrid(), time: newTimeFrame.alignedToPixelGrid(), sameLine: true)
 		}
 	}
 
