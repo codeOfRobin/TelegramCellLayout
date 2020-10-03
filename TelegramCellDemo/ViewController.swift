@@ -9,6 +9,7 @@ import UIKit
 
 extension CGRect {
 	func alignedToPixelGrid() -> CGRect {
+		/// This is the world's bluntest way to achieve this: I am *not* proud of using it. Nevertheless, I persist.
 		return CGRect(x: floor(self.origin.x), y: floor(self.origin.y), width: floor(self.width), height: floor(self.height))
 	}
 }
@@ -20,7 +21,7 @@ class TelegramView: UIView {
 	var cachedFrames: (message: CGRect, time: CGRect, sameLine: Bool)?
 
 	init(message: String, time: String) {
-		///BLEEH why isn't this fixed yet
+		///BLEEH why isn't this fixed yet. It's 2020 I shouldn't need to frame: .zero
 		super.init(frame: .zero)
 		/// Still sucks that UIKit doesn't have a well defined place to "set the state", so here we are
 		self.messageLabel.text = message
@@ -36,6 +37,7 @@ class TelegramView: UIView {
 		self.messageLabel.bounces = false
 		self.timeLabel.bounces = false
 
+		/// Uncomment these lines if you wanna see the frames for...reasons.
 //		self.messageLabel.backgroundColor = .systemTeal
 //		self.timeLabel.backgroundColor = .systemGreen
 	}
@@ -122,7 +124,6 @@ class ViewController: UIViewController {
 		telegramView1.frame = CGRect(origin: CGPoint(x: 0, y: telegramView0.frame.maxY + 20), size: size1)
 		telegramView2.frame = CGRect(origin: CGPoint(x: 0, y: telegramView1.frame.maxY + 20), size: size2)
 	}
-
 
 }
 
