@@ -7,6 +7,12 @@
 
 import UIKit
 
+extension CGRect {
+	func alignToPixelGrid() -> CGRect {
+		return CGRect(x: round(self.origin.x), y: round(self.origin.y), width: round(self.width), height: round(self.height))
+	}
+}
+
 class TelegramView: UIView {
 	let messageLabel = UITextView()
 	let timeLabel = UITextView()
@@ -61,15 +67,14 @@ class TelegramView: UIView {
 		messageLabel.layoutManager.removeTextContainer(at: 0)
 		timeLabel.layoutManager.removeTextContainer(at: 0)
 
-		print(messageLabel.textContainerInset)
 		let descenderDiff = ((messageLabel.font!.descender) - (timeLabel.font!.descender))
 
 		if estimatedTimeWidth + estimatedMessageLastLineWidth < size.width {
 			let newTimeFrame = CGRect(x: messageLabelLastGlyphFrame.maxX, y: messageLabelLastGlyphFrame.maxY - timeFrame.height + descenderDiff, width: size.width - messageLabelLastGlyphFrame.maxX, height: timeFrame.height)
-			return (message: messageFrame, time: newTimeFrame, sameLine: true)
+			return (message: messageFrame.alignToPixelGrid(), time: newTimeFrame.alignToPixelGrid(), sameLine: true)
 		} else {
 			let newTimeFrame = CGRect(x: 0, y: messageFrame.maxY, width: size.width, height: timeFrame.height)
-			return (message: messageFrame, time: newTimeFrame, sameLine: true)
+			return (message: messageFrame.alignToPixelGrid(), time: newTimeFrame.alignToPixelGrid(), sameLine: true)
 		}
 	}
 
@@ -95,7 +100,7 @@ class TelegramView: UIView {
 
 class ViewController: UIViewController {
 
-	let telegramView0 = TelegramView(message: "short message", time: "9:41 AM")
+	let telegramView0 = TelegramView(message: "short message short message", time: "9:41 AM")
 	let telegramView1 = TelegramView(message: "long message that does messagey things too amongst others", time: "9:41 AM")
 	let telegramView2 = TelegramView(message: "long message that doesn't do much", time: "9:41 AM")
 
